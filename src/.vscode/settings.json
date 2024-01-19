@@ -1,0 +1,4 @@
+{
+    "cSpell.words": ["BESTAPI", "BESTM", "laddr", "psutil", "raddr"],
+    "python.analysis.extraPaths": ["./Automation_Functions"]
+}
