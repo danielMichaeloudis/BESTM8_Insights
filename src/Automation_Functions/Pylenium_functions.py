@@ -2,45 +2,49 @@ import os
 import json
 import re
 from playwright.sync_api import Page, expect, sync_playwright, Playwright
+from pylenium.driver import Pylenium
+from pylenium.config import PyleniumConfig
 
 # TODO not current config, do this some other way
 with open(os.getcwd() + "\src\Current_Config.json", mode="rb") as fp:
     CONFIG = json.load(fp)
 
-PORTAL_URL = CONFIG["server"]["url"]
+PORTAL_URL = "http://" + CONFIG["server"]["url"]
 
 
 class Test_Environment:
     def __init__(self, browser: str = "chrome", headless: bool = True):
-        self.playwright = sync_playwright().start()
-        self.page = self.playwright.chromium.launch(headless=headless).new_page()
+        self.config = PyleniumConfig()
+        self.py = Pylenium(self.config)
 
     def __del__(self):
-        self.playwright.stop()
+        self.py.quit()
 
     def load_insights_portal(self):
         print("Loading Page: " + PORTAL_URL)
-        self.page.goto(PORTAL_URL)
+        self.py.visit(PORTAL_URL)
 
     def enter_text_into_textbox_by_name(self, name: str, text_to_enter: str):
-        self.page.get_by_role("textbox", name=name).fill(text_to_enter)
+        textbox = self.py.contains(name)
+        if textbox.tag_name() == "input" or textbox.tag_name() == "textbox":
+            textbox.type(text_to_enter)
+            return
+        if textbox.tag_name() == "label":
+            id = textbox.get_attribute("for")
+            textbox = self.py.get("#" + id)
+            textbox.type(text_to_enter)
 
     def click_button_with_text(self, text: str):
-        button = self.page.get_by_role("button", name=text)
-        button.click()
+        button = self.py.contains(text)
+        return button.click()
 
     def check_for_title(self, title: str):
         try:
-            expect(self.page).to_have_title(title)
-            return True
+            print(self.py.title())
+            return self.py.title() == title
         except Exception as e:
+            print("Unexpected error:")
             print(e)
-            error_message = e.args[0]
-            error_match = re.search(r"Actual value: (.*)", error_message)
-            if error_match:
-                print("Unexpected Title Found: " + error_match.group(1))
-            else:
-                print("Unexpected error")
             return False
 
     def run_and_log_in(self, user_id=0, username=None, password=None):
@@ -59,12 +63,13 @@ class Test_Environment:
         self.enter_text_into_textbox_by_name("Name", username)
         self.enter_text_into_textbox_by_name("Password", password)
         self.click_button_with_text("Log In")
-        if self.check_for_title("BEST Insights - Home"):
-            return True, "Success"
         try:
-            expect(
-                self.page.get_by_text("Incorrect username and password")
-            ).to_be_visible
+            self.py.wait().until(lambda _: self.py.title() == "BEST Insights - Home")
+            return True, "Success"
+        except:
+            print("login Failed, title = " + self.py.title())
+        try:
+            self.py.contains("Incorrect username and password")
             return False, "Login Fail, incorrect Username/Password"
         except:
             return False, "Unknown Error"

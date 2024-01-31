@@ -1,2 +1,21 @@
-[22:24:06.891]: C:\Users\DanielMichaeloudis\Documents\BESTM8_Insights
-[22:24:34.847]: C:\Users\DanielMichaeloudis\Documents\BESTM8_Insights
+[10:09:18.081]: Killed Back End
+[10:09:18.082]: Starting to run portal
+[10:09:18.894]: checking port: 8080
+[10:09:20.901]: checking port: 80
+[10:09:22.910]: checking port: 5500
+[10:09:22.910]: api ready
+[10:09:23.913]: checking port: 8080
+[10:09:26.001]: checking port: 80
+[10:09:29.011]: checking port: 8080
+[10:09:31.018]: checking port: 80
+[10:09:31.018]: back ready
+[10:09:32.021]: checking port: 8080
+[10:09:35.023]: checking port: 8080
+[10:09:38.026]: checking port: 8080
+[10:09:41.031]: checking port: 8080
+[10:09:44.043]: checking port: 8080
+[10:09:47.043]: checking port: 8080
+[10:09:50.046]: checking port: 8080
+[10:09:50.047]: front ready
+[10:09:51.048]: ('Module1',)
+[10:09:51.048]: Running Module

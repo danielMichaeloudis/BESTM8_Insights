@@ -1,5 +1,0 @@
-[server]
-portalHost = "localhost"
-portalPort = "8080"
-apiHost = ""
-apiPort = ""

@@ -4,12 +4,11 @@ import re
 import os
 from pathlib import Path
 
-try:
-    from src.Module import Module
-    from src.Insights_Runner import *
-    from utils import logger
-except Exception as e:
-    input("aaaaa: " + str(e))
+from src.Module import Module
+from src.Insights_Runner import *
+from src.utils import Logger
+
+logger = Logger()
 
 
 class BESTM8:
@@ -30,7 +29,10 @@ class BESTM8:
         self.module_list = tk.Toplevel(self.root)
         self.modules = os.listdir(self.MODULES_PATH)
         self.modules_tree = ttk.Treeview(
-            self.module_list, columns=("module",), height=20
+            self.module_list,
+            columns="Module",
+            height=20,
+            selectmode="extended",
         )
         self.modules_tree.pack(padx=5, pady=5)
         i = 0
@@ -51,8 +53,7 @@ class BESTM8:
         self.run_module_button.pack()
 
     def setup_insights(self):
-        module = self.modules_tree.item(self.modules_tree.selection())["text"]
-        print(module)
+        module = self.modules_tree.item(self.modules_tree.selection()[0])["text"]
         self.current_module = Module(path=self.MODULES_PATH + module)
         self.insights_portal = Insights_Portal(
             self.current_module.insights_source_path,

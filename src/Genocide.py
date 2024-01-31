@@ -33,3 +33,6 @@ if __name__ == "__main__":
     # Kill Back end
     pid = get_pid(80)
     murder(pid)
+    # Kill API
+    pid = get_pid(5500)
+    murder(pid)

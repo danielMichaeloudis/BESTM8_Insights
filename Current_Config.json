@@ -1,0 +1,13 @@
+{
+    "server": {
+        "url": "localhost:8080",
+        "apiHost": "",
+        "apiPort": ""
+    },
+    "users": {
+        "admin": {
+            "username": "sysadmin",
+            "password": "password"
+        }
+    }
+}

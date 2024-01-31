@@ -7,7 +7,9 @@ import time
 import socket
 from pathlib import Path
 
-from utils import logger
+from src.utils import My_Log
+
+logger = My_Log.Logger()
 
 
 def get_pid(port):
@@ -37,16 +39,19 @@ def check_port(host, port, timeout=2):
 
 class BESTAPI:
     async def run(self, source_path: str):
-        self.API_log = open(logger.LOG_PATH + "/APILog.txt", "w")
+        self.API_log = open(My_Log.LOG_PATH + "/APILog.txt", "w")
         # TODO add in support for building api
         # os.chdir(source_path + "/BESTAPI")
         # subprocess.run("msbuild BESTAPI.sln /p:configuration=Release")
         cwd = os.getcwd()
         os.chdir(source_path + "/bin")
         cmd = ["BESTAPI.exe"]
-        self.front_process = await asyncio.create_subprocess_exec(
-            *cmd, stdout=self.API_log
-        )
+        try:
+            self.front_process = await asyncio.create_subprocess_exec(
+                *cmd, stdout=self.API_log
+            )
+        except Exception as e:
+            logger.log("Unable To Run Best API")
         os.chdir(cwd)
 
 
@@ -55,16 +60,20 @@ class Insights_Portal:
     front, back, BESTAPI = None, None, None
 
     def __init__(self, source_path: str, config_file: str = None):
-        self.front_log_file = open(logger.LOG_PATH + "/FrontEndLog.txt", "w")
-        self.back_log_file = open(logger.LOG_PATH + "/BackEndLog.txt", "w")
+        self.front_log_file = open(My_Log.LOG_PATH + "/FrontEndLog.txt", "w")
+        self.back_log_file = open(My_Log.LOG_PATH + "/BackEndLog.txt", "w")
         self.kill_front(False)
         self.kill_back(False)
         if config_file is not None:
             with open(config_file) as fp:
                 self.config_json = json.load(fp)
-        logger.log("Starting to run portal")
-        self.BESTAPI = BESTAPI()
-        asyncio.run(self.initialise_portal(source_path))
+            logger.log("Starting to run portal")
+            self.BESTAPI = BESTAPI()
+            if "insights_source_path" in self.config_json:
+                self.set_current_url()
+                asyncio.run(self.initialise_portal(source_path))
+            if "portal" in self.config_json:
+                self.set_current_url(self.config_json["portal"]["url"])
 
     def __del__(self):
         self.kill_front()
@@ -177,7 +186,23 @@ class Insights_Portal:
             logger.log(return_func_args)
             return_func(return_func_args)
 
+    def set_current_url(self, url: str = "localhost:8080"):
+        with open("src/Current_Config.json") as cc:
+            a = cc.read()
+            cc_json = json.loads(a)
+        cc_json["server"]["url"] = url
+        if "users" in self.config_json:
+            print(self.config_json["users"])
+            cc_json["users"] = self.config_json["users"]
+            print("added users")
+            print(cc_json)
+        with open("src/Current_Config.json", "w") as cc:
+            cc.write(json.dumps(cc_json, indent=4))
+
 
 if __name__ == "__main__":
-    i = Insights_Portal("C:/Projects/Insights/Features/31849/Source")
+    i = Insights_Portal(
+        "C:/Projects/Insights/Features/31849/Source",
+        "C:/Users/DanielMichaeloudis/Documents/BESTM8_Insights/Modules/Module1/config.json",
+    )
     i.await_setup(None, None)
